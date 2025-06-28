@@ -1,0 +1,191 @@
+openapi: 3.0.0
+info:
+  title: Bus Booking System API
+  version: 1.0.0
+  description: API for managing bus bookings, routes, and authentication.
+
+servers:
+  - url: http://localhost:5000/api
+
+paths:
+  /auth/register:
+    post:
+      summary: Register a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Register'
+      responses:
+        '200':
+          description: User registered successfully
+
+  /auth/login:
+    post:
+      summary: Login user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Login'
+      responses:
+        '200':
+          description: Authenticated user with tokens
+
+  /admin/routes:
+    post:
+      summary: Add a new route
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Route'
+      responses:
+        '200':
+          description: Route added successfully
+
+  /admin/buses:
+    post:
+      summary: Add a new bus
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Bus'
+      responses:
+        '200':
+          description: Bus added successfully
+
+  /user/buses/search:
+    get:
+      summary: Search for available buses
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: origin
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: destination
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of matching buses
+
+  /user/bookings:
+    post:
+      summary: Book a bus
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Booking'
+      responses:
+        '200':
+          description: Bus booked successfully
+
+  /user/bookings/{bookingId}:
+    delete:
+      summary: Cancel a booking
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: bookingId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Booking canceled
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    Register:
+      type: object
+      required: [name, email, password]
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+
+    Login:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+
+    Route:
+      type: object
+      required: [origin, destination, duration, price]
+      properties:
+        origin:
+          type: string
+        destination:
+          type: string
+        duration:
+          type: string
+        stops:
+          type: array
+          items:
+            type: string
+        price:
+          type: number
+
+    Bus:
+      type: object
+      required: [number, capacity, type, amenities, routeId, availableSeats]
+      properties:
+        number:
+          type: string
+        capacity:
+          type: integer
+        type:
+          type: string
+        amenities:
+          type: array
+          items:
+            type: string
+        routeId:
+          type: string
+        availableSeats:
+          type: integer
+
+    Booking:
+      type: object
+      required: [busId, routeId, date]
+      properties:
+        busId:
+          type: string
+        routeId:
+          type: string
+        date:
+          type: string
+          format: date
